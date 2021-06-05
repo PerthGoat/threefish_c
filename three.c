@@ -80,7 +80,7 @@ void enc_tf256(TF_WORD * bsk, TF_WORD * tweak, TF_WORD * data) {
     run_1_round(bsk, tweak, data, r);
     
     printf("Round %d\n", r);
-    printf("%llx %llx %llx %llx\n", data[0], data[1], data[2], data[3]);
+    printf("%I64u %I64u %I64u %I64u\n", data[0], data[1], data[2], data[3]);
   }
   
   int rnd = 72;
@@ -109,7 +109,7 @@ void enc_tf256(TF_WORD * bsk, TF_WORD * tweak, TF_WORD * data) {
   }
     
   printf("Round 72\n");
-  printf("%llx %llx %llx %llx\n", data[0], data[1], data[2], data[3]);
+  printf("%I64u %I64u %I64u %I64u\n", data[0], data[1], data[2], data[3]);
     
 }
 
@@ -193,11 +193,11 @@ void dec_tf256(TF_WORD * bsk, TF_WORD * tweak, TF_WORD * data) {
     // then reverse the other steps
     dec_1_round(bsk, tweak, data, r);
     printf("Reverse round %d\n", r);
-    printf("%llx %llx %llx %llx\n", data[0], data[1], data[2], data[3]);
+    printf("%I64u %I64u %I64u %I64u\n", data[0], data[1], data[2], data[3]);
   }
   
   printf("Reverse Data\n");
-  printf("%c %c %c %c\n", data[0], data[1], data[2], data[3]);
+  printf("%s%s%s%s\n", (char*)&data[0], (char*)&data[1], (char*)&data[2], (char*)&data[3]);
 }
 
 // the rol seems to be working
@@ -211,7 +211,7 @@ void test_rol() {
     
     if(p != t) {
       printf("ERR\n");
-      printf("%u != %u\n", p, t);
+      printf("%I64u != %I64u\n", p, t);
       exit(0);
     }
   }
@@ -241,9 +241,17 @@ int main() {
   // 3rd word is the xor
   twk[2] = twk[0] ^ twk[1];
   
+  // puts strings in the 64-bit integers (TF_WORD)
+  // for encryption
+  // TF_WORD * turns the char pointer into a 64-bit TF_WORD pointer
+  // * dereferences the 64-bit pointer into a 64-bit integer
+  // so essentially it turns the ascii text into a 64-bit number
+  TF_WORD d1 = *((TF_WORD *)"Hello, ");
+  TF_WORD d2 = *((TF_WORD *)"World.");
+  
   // data is only 4 words, key is 5 for rotation
   TF_WORD data[] = {
-    'F', 'U', 'C', 'K'
+    d1, d2, '\0', '\0'
   };
   
   // pass them all into the encryption function
